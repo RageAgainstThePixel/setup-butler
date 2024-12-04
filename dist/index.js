@@ -28804,7 +28804,7 @@ async function Run() {
     core.addPath(toolDirectory);
     core.exportVariable(BUTLER_PATH, toolPath);
     core.info(`${BUTLER_PATH} -> ${toolPath}`);
-    await exec.exec(butler, ['-help']);
+    await exec.exec(butler, ['--help']);
 }
 async function findOrDownload() {
     let installVersion = core.getInput('version') || 'latest';
