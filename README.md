@@ -19,14 +19,13 @@ jobs:
         with:
           api-key: ${{ secrets.BUTLER_API_KEY }}
       # run butler
-      - run: butler -V
+      - run: butler --version
 ```
 
 ### inputs
 
 | name | description | required |
 | ---- | ----------- | -------- |
-| .... | ........... | ........ |
 | `api-key` | An [api key for your itch.io account](https://itch.io/user/settings/api-keys) | true |
 | `version` | The version of butler to install. Defaults to `latest`. | false |
 | `self-update` | Update butler to the latest version. Defaults to `true`. | false |

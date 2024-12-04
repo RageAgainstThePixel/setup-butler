@@ -26,4 +26,4 @@ jobs:
         with:
           api-key: ${{ secrets.BUTLER_API_KEY }}
       # run butler
-      - run: butler -V
+      - run: butler --version
