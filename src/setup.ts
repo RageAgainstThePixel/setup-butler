@@ -23,24 +23,30 @@ export async function Run(): Promise<void> {
 }
 
 async function findOrDownload(): Promise<string> {
+  let installVersion = core.getInput('version') || 'latest';
+  installVersion = installVersion.trim().toLowerCase();
+  if (installVersion === 'latest') {
+    installVersion = await getLatestVersion();
+  } else {
+    if (!/^\d+\.\d+\.\d+$/.test(installVersion)) {
+      throw new Error(`Invalid version string: ${installVersion}`);
+    }
+  }
   const allVersions = tc.findAllVersions(butler);
   core.info(`Found installed versions: ${allVersions}`);
   let toolDirectory = undefined;
   if (allVersions && allVersions.length > 0) {
-    const latest = allVersions.sort().pop();
-    toolDirectory = tc.find(butler, latest);
+    if (installVersion === 'latest') {
+      const latest = allVersions.sort().pop();
+      toolDirectory = tc.find(butler, latest);
+    } else {
+      if (allVersions.includes(installVersion)) {
+        toolDirectory = tc.find(butler, installVersion);
+      }
+    }
   }
   let tool = undefined;
   if (!toolDirectory) {
-    let installVersion = core.getInput('version') || 'latest';
-    installVersion = installVersion.trim().toLowerCase();
-    if (installVersion === 'latest') {
-      installVersion = await getLatestVersion();
-    } else {
-      if (!/^\d+\.\d+\.\d+$/.test(installVersion)) {
-        throw new Error(`Invalid version string: ${installVersion}`);
-      }
-    }
     const [url, archiveName] = getDownloadUrl(installVersion);
     const archiveDownloadPath = path.join(getTempDirectory(), archiveName);
     core.info(`Attempting to download ${butler} from ${url} to ${archiveDownloadPath}`);
@@ -118,6 +124,10 @@ async function getVersion(tool: string): Promise<string> {
       }
     }
   });
+  // check if the output contains `head`
+  if (output.includes('head')) {
+    return 'latest';
+  }
   const match = output.match(/(\d+\.\d+\.\d+)/);
   if (match && match.length > 1) {
     return match[1];
