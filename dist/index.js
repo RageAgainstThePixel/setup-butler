@@ -28849,9 +28849,8 @@ async function findOrDownload() {
         }
         core.info(`Successfully extracted ${butler} to ${downloadDirectory}`);
         tool = path.join(downloadDirectory, toolPath);
-        const downloadVersion = await getVersion(tool);
-        core.info(`Setting tool cache: ${downloadDirectory} | ${butler} | ${downloadVersion}`);
-        toolDirectory = await tc.cacheDir(downloadDirectory, butler, downloadVersion);
+        core.info(`Setting tool cache: ${downloadDirectory} | ${butler} | ${installVersion}`);
+        toolDirectory = await tc.cacheDir(downloadDirectory, butler, installVersion);
     }
     else {
         tool = path.join(toolDirectory, toolPath);
@@ -28864,6 +28863,8 @@ async function findOrDownload() {
     }
     await fs.promises.access(tool);
     core.info(`Found ${tool} in ${toolDirectory}`);
+    await exec.exec(tool, ['-V']);
+    await exec.exec(tool, ['--help']);
     return toolDirectory;
 }
 async function getLatestVersion() {
@@ -28895,26 +28896,6 @@ function getDownloadUrl(version) {
 }
 function getTempDirectory() {
     return process.env['RUNNER_TEMP'] || '';
-}
-async function getVersion(tool) {
-    let output = '';
-    await exec.exec(tool, ['-V'], {
-        listeners: {
-            stdout: (data) => {
-                output += data.toString();
-            }
-        }
-    });
-    if (output.includes('head')) {
-        return 'latest';
-    }
-    const match = output.match(/(\d+\.\d+\.\d+)/);
-    if (match && match.length > 1) {
-        return match[1];
-    }
-    else {
-        throw new Error(`Failed to get version from ${tool}!\n${output}`);
-    }
 }
 
 
