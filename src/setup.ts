@@ -15,7 +15,7 @@ const toolPath = `${butler}${toolExtension}`;
 
 export async function Run(): Promise<void> {
   const toolDirectory = await findOrDownload();
-  core.debug(`${BUTLER_DIR} -> ${toolDirectory}`);
+  core.info(`${BUTLER_DIR} -> ${toolDirectory}`);
   core.addPath(toolDirectory);
   core.exportVariable(BUTLER_PATH, toolPath);
   core.info(`${BUTLER_PATH} -> ${toolPath}`);
@@ -55,18 +55,18 @@ async function findOrDownload(): Promise<string> {
     if (IS_LINUX || IS_MAC) {
       await exec.exec(`chmod +x ${downloadDirectory}`);
     }
-    core.debug(`Successfully extracted ${butler} to ${downloadDirectory}`);
+    core.info(`Successfully extracted ${butler} to ${downloadDirectory}`);
     tool = path.join(downloadDirectory, toolPath);
     const downloadVersion = await getVersion(tool);
-    core.debug(`Setting tool cache: ${downloadDirectory} | ${butler} | ${downloadVersion}`);
+    core.info(`Setting tool cache: ${downloadDirectory} | ${butler} | ${downloadVersion}`);
     toolDirectory = await tc.cacheDir(downloadDirectory, butler, downloadVersion);
   } else {
     tool = path.join(toolDirectory, toolPath);
     const selfUpdate = (core.getInput('self-update') || 'true').trim().toLowerCase();
     if (selfUpdate === 'true') {
-      core.debug(`Attempting to upgrade ${butler}...`);
+      core.info(`Attempting to upgrade ${butler}...`);
       await exec.exec(tool, ['upgrade']);
-      core.debug(`Successfully upgraded ${butler}!`);
+      core.info(`Successfully upgraded ${butler}!`);
     }
   }
   await fs.promises.access(tool);
@@ -85,6 +85,7 @@ async function getLatestVersion(): Promise<string> {
       }
     }
   });
+  core.info(`Latest version: ${output}`);
   return output.trim();
 }
 
@@ -96,7 +97,7 @@ const variantMap = {
 
 function getDownloadUrl(version: string): [string, string] {
   const variant = variantMap[process.platform];
-  const baseUrl = 'https://broth.itch.zone/butler/';
+  const baseUrl = 'https://broth.itch.ovh/butler/';
   const archiveName = `butler-${variantMap[process.platform]}.zip`;
   return [`${baseUrl}${variant}/${version}/archive/default/${archiveName}`, archiveName];
 }
