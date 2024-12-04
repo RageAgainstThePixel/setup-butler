@@ -1,4 +1,4 @@
-name: setup-butler
+name: 'Setup Butler'
 description: A Github Action to setup the butler command line tools for itch.io content authoring.
 branding:
   color: 'blue'
