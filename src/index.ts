@@ -15,11 +15,7 @@ const main = async () => {
                 await setup.Run();
                 core.info(`Butler setup complete.`);
                 const apiKey = core.getInput('api-key', { required: true });
-                await exec.exec('butler', ['login'], {
-                    env: {
-                        BUTLER_API_KEY: apiKey
-                    }
-                });
+                await exec.exec('butler', ['login'], { env: { BUTLER_API_KEY: apiKey } });
             } catch (error) {
                 core.setFailed(error);
             }
@@ -38,7 +34,7 @@ const main = async () => {
                     break;
             }
             try {
-                await fs.promises.access(cacheDir, fs.constants.W_OK);
+                if (!fs.existsSync(cacheDir)) { return; }
                 await io.rmRF(cacheDir);
             } catch (error) {
                 core.error(`Failed to remove ${cacheDir}`);
