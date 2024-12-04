@@ -17,7 +17,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [macos-latest, windows-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v4
-      - run: echo "hello world"
+      # download and setup butler
+      - uses: ./
+        name: RageAgainstThePixel/setup-butler
+        with:
+          api-key: ${{ secrets.BUTLER_API_KEY }}
+      # run butler
+      - run: butler --version
