@@ -78,12 +78,14 @@ async function getLatestVersion(): Promise<string> {
   const baseUrl = 'https://broth.itch.zone/butler/';
   const variant = variantMap[process.platform];
   let output = '';
+  core.info(`[command] curl ${baseUrl}${variant}/LATEST`);
   await exec.exec('curl', [`${baseUrl}${variant}/LATEST`], {
     listeners: {
       stdout: (data: Buffer) => {
         output += data.toString();
       }
-    }
+    },
+    silent: !core.isDebug()
   });
   core.info(`Latest version: ${output}`);
   return output.trim();
@@ -99,7 +101,8 @@ function getDownloadUrl(version: string): [string, string] {
   const variant = variantMap[process.platform];
   const baseUrl = 'https://broth.itch.ovh/butler/';
   const archiveName = `butler-${variantMap[process.platform]}.zip`;
-  return [`${baseUrl}${variant}/${version}/archive/default/${archiveName}`, archiveName];
+  // https://broth.itch.ovh/butler/linux-amd64/15.23.0/archive/default
+  return [`${baseUrl}${variant}/${version}/archive/default`, archiveName];
 }
 
 function getTempDirectory(): string {
