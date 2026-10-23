@@ -12,7 +12,7 @@ inputs:
     required: false
     default: 'latest'
   self-update:
-    description: 'Whether to update the butler CLI to the latest version.'
+    description: 'Whether to update the butler CLI to the latest version. Only applies when `version` is `latest`.'
     required: false
     default: 'true'
 runs:
