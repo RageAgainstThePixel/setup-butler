@@ -68,7 +68,7 @@ async function findOrDownload(version: string): Promise<string> {
 
 async function validateVersion(tool: string, version: string): Promise<void> {
   let output = '';
-  await exec.exec(tool, ['--version'], {
+  await exec.exec(`"${tool}"`, ['--version'], {
     listeners: {
       stdout: (data: Buffer) => { output += data.toString(); },
       stderr: (data: Buffer) => { output += data.toString(); }
@@ -83,11 +83,10 @@ async function validateVersion(tool: string, version: string): Promise<void> {
 async function getLatestVersion(): Promise<string> {
   const url = `${baseUrl}${getVariant()}/LATEST`;
   core.debug(`Getting latest ${butler} version from ${url}`);
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to get latest ${butler} version: ${response.status} ${response.statusText}`);
-  }
-  const version = (await response.text()).trim();
+  // tool-cache honors the runner's proxy settings, unlike a bare fetch
+  const latestPath = await tc.downloadTool(url, path.join(getTempDirectory(), `${butler}-LATEST-${crypto.randomUUID()}`));
+  const version = (await fs.promises.readFile(latestPath, 'utf8')).trim();
+  await fs.promises.rm(latestPath, { force: true });
   core.debug(`Latest version: ${version}`);
   return version;
 }

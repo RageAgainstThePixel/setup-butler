@@ -34364,7 +34364,7 @@ async function findOrDownload(version) {
 }
 async function validateVersion(tool, version) {
     let output = '';
-    await exec.exec(tool, ['--version'], {
+    await exec.exec(`"${tool}"`, ['--version'], {
         listeners: {
             stdout: (data) => { output += data.toString(); },
             stderr: (data) => { output += data.toString(); }
@@ -34378,11 +34378,9 @@ async function validateVersion(tool, version) {
 async function getLatestVersion() {
     const url = `${baseUrl}${getVariant()}/LATEST`;
     core.debug(`Getting latest ${butler} version from ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Failed to get latest ${butler} version: ${response.status} ${response.statusText}`);
-    }
-    const version = (await response.text()).trim();
+    const latestPath = await tc.downloadTool(url, path.join(getTempDirectory(), `${butler}-LATEST-${crypto.randomUUID()}`));
+    const version = (await fs.promises.readFile(latestPath, 'utf8')).trim();
+    await fs.promises.rm(latestPath, { force: true });
     core.debug(`Latest version: ${version}`);
     return version;
 }
