@@ -33686,14 +33686,16 @@ async function Run() {
     const toolDirectory = await findOrDownload();
     core.info(`${BUTLER_DIR} -> ${toolDirectory}`);
     core.addPath(toolDirectory);
-    core.exportVariable(BUTLER_PATH, toolPath);
-    core.info(`${BUTLER_PATH} -> ${toolPath}`);
+    const butlerPath = path.join(toolDirectory, toolPath);
+    core.exportVariable(BUTLER_PATH, butlerPath);
+    core.info(`${BUTLER_PATH} -> ${butlerPath}`);
     await exec.exec(butler, ['--help']);
 }
 async function findOrDownload() {
     let installVersion = core.getInput('version') || 'latest';
     installVersion = installVersion.trim().toLowerCase();
-    if (installVersion === 'latest') {
+    const isLatest = installVersion === 'latest';
+    if (isLatest) {
         installVersion = await getLatestVersion();
     }
     else {
@@ -33704,16 +33706,8 @@ async function findOrDownload() {
     const allVersions = tc.findAllVersions(butler);
     core.debug(`Found installed versions: ${allVersions}`);
     let toolDirectory = undefined;
-    if (allVersions && allVersions.length > 0) {
-        if (installVersion === 'latest') {
-            const latest = allVersions.sort().pop();
-            toolDirectory = tc.find(butler, latest);
-        }
-        else {
-            if (allVersions.includes(installVersion)) {
-                toolDirectory = tc.find(butler, installVersion);
-            }
-        }
+    if (allVersions && allVersions.includes(installVersion)) {
+        toolDirectory = tc.find(butler, installVersion);
     }
     let tool = undefined;
     if (!toolDirectory) {
@@ -33740,7 +33734,7 @@ async function findOrDownload() {
     else {
         tool = path.join(toolDirectory, toolPath);
         const selfUpdate = (core.getInput('self-update') || 'true').trim().toLowerCase();
-        if (selfUpdate === 'true') {
+        if (isLatest && selfUpdate === 'true') {
             core.debug(`Attempting to upgrade ${butler}...`);
             await exec.exec(tool, ['upgrade']);
             core.debug(`Successfully upgraded ${butler}!`);
@@ -34117,6 +34111,8 @@ const exec = __nccwpck_require__(1514);
 const io = __nccwpck_require__(7436);
 const setup = __nccwpck_require__(8429);
 const fs = __nccwpck_require__(7147);
+const os = __nccwpck_require__(2037);
+const path = __nccwpck_require__(1017);
 const IS_POST = !!core.getState('isPost');
 const main = async () => {
     try {
@@ -34137,14 +34133,11 @@ const main = async () => {
             await exec.exec('butler', ['logout']);
             let cacheDir = '';
             switch (process.platform) {
-                case 'linux':
-                    cacheDir = '~/.config/itch';
-                    break;
                 case 'darwin':
-                    cacheDir = '~/Library/Application Support/itch';
+                    cacheDir = path.join(os.homedir(), 'Library', 'Application Support', 'itch');
                     break;
-                case 'win32':
-                    cacheDir = '%USERPROFILE%\\.config\\itch';
+                default:
+                    cacheDir = path.join(os.homedir(), '.config', 'itch');
                     break;
             }
             try {
