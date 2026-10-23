@@ -11,10 +11,11 @@ inputs:
     description: 'The version of the butler CLI to install.'
     required: false
     default: 'latest'
-  self-update:
-    description: 'Whether to update the butler CLI to the latest version. Only applies when `version` is `latest`.'
-    required: false
-    default: 'true'
+outputs:
+  path:
+    description: 'The full path to the butler executable.'
+  version:
+    description: 'The installed butler version.'
 runs:
   using: 'node24'
   main: 'dist/index.js'
