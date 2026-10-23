@@ -17,15 +17,17 @@ export async function Run(): Promise<void> {
   const toolDirectory = await findOrDownload();
   core.info(`${BUTLER_DIR} -> ${toolDirectory}`);
   core.addPath(toolDirectory);
-  core.exportVariable(BUTLER_PATH, toolPath);
-  core.info(`${BUTLER_PATH} -> ${toolPath}`);
+  const butlerPath = path.join(toolDirectory, toolPath);
+  core.exportVariable(BUTLER_PATH, butlerPath);
+  core.info(`${BUTLER_PATH} -> ${butlerPath}`);
   await exec.exec(butler, ['--help']);
 }
 
 async function findOrDownload(): Promise<string> {
   let installVersion = core.getInput('version') || 'latest';
   installVersion = installVersion.trim().toLowerCase();
-  if (installVersion === 'latest') {
+  const isLatest = installVersion === 'latest';
+  if (isLatest) {
     installVersion = await getLatestVersion();
   } else {
     if (!/^\d+\.\d+\.\d+$/.test(installVersion)) {
@@ -35,15 +37,8 @@ async function findOrDownload(): Promise<string> {
   const allVersions = tc.findAllVersions(butler);
   core.debug(`Found installed versions: ${allVersions}`);
   let toolDirectory = undefined;
-  if (allVersions && allVersions.length > 0) {
-    if (installVersion === 'latest') {
-      const latest = allVersions.sort().pop();
-      toolDirectory = tc.find(butler, latest);
-    } else {
-      if (allVersions.includes(installVersion)) {
-        toolDirectory = tc.find(butler, installVersion);
-      }
-    }
+  if (allVersions && allVersions.includes(installVersion)) {
+    toolDirectory = tc.find(butler, installVersion);
   }
   let tool = undefined;
   if (!toolDirectory) {
@@ -69,7 +64,8 @@ async function findOrDownload(): Promise<string> {
   } else {
     tool = path.join(toolDirectory, toolPath);
     const selfUpdate = (core.getInput('self-update') || 'true').trim().toLowerCase();
-    if (selfUpdate === 'true') {
+    // only upgrade when tracking latest, a pinned version must stay pinned
+    if (isLatest && selfUpdate === 'true') {
       core.debug(`Attempting to upgrade ${butler}...`);
       await exec.exec(tool, ['upgrade']);
       core.debug(`Successfully upgraded ${butler}!`);
