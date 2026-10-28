@@ -18,6 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
+        version: [latest, 15.21.0]
     steps:
       - uses: actions/checkout@v6
       # download and setup butler
@@ -26,6 +27,7 @@ jobs:
         name: RageAgainstThePixel/setup-butler
         with:
           api-key: ${{ secrets.BUTLER_API_KEY }}
+          version: ${{ matrix.version }}
       # run butler
       - run: butler --version
       - run: |
