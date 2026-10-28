@@ -15,7 +15,7 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
     steps:
       # download and setup butler
-      - uses: RageAgainstThePixel/setup-butler@v1
+      - uses: RageAgainstThePixel/setup-butler@v2
         with:
           api-key: ${{ secrets.BUTLER_API_KEY }}
       # run butler commands
@@ -32,11 +32,13 @@ jobs:
 | ---- | ----------- | -------- |
 | `api-key` | An [api key for your itch.io account](https://itch.io/user/settings/api-keys) | true |
 | `version` | The version of butler to install. Defaults to `latest`. | false |
-| `self-update` | Update butler to the latest version. Defaults to `true`. | false |
 
 ### outputs
 
+- `path`: The full path to the butler executable.
+- `version`: The installed butler version.
+
 ### environment variables
 
-- `BUTLER_PATH`: The `butler` directory location.
+- `BUTLER_PATH`: The full path to the butler executable.
 - `BUTLER_DIR`: The directory where butler is installed.
