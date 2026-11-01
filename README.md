@@ -42,3 +42,5 @@ jobs:
 
 - `BUTLER_PATH`: The full path to the butler executable.
 - `BUTLER_DIR`: The directory where butler is installed.
+
+<!-- docs-only ci test -->
