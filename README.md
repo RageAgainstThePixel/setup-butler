@@ -26,12 +26,14 @@ jobs:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
 ```
 
+The action runs `butler login` with the `api-key` to check it, but doesn't save it, so later butler steps still need `BUTLER_API_KEY`. The post step runs `butler logout` and deletes the itch config directory.
+
 ### inputs
 
 | name | description | required |
 | ---- | ----------- | -------- |
 | `api-key` | An [api key for your itch.io account](https://itch.io/user/settings/api-keys) | true |
-| `version` | The version of butler to install. Defaults to `latest`. | false |
+| `version` | The version of butler to install, as `x.y.z` (a leading `v` is allowed). Defaults to `latest`. | false |
 
 ### outputs
 
