@@ -22,9 +22,11 @@ jobs:
       - name: Upload to itch.io
         # https://itch.io/docs/butler/pushing.html
         run: butler push directory user/game:channel
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
 ```
 
-The action runs `butler login` with the `api-key`, so later steps don't need `BUTLER_API_KEY`. The post step runs `butler logout` and deletes the itch config directory.
+The action runs `butler login` with the `api-key` to check it, but doesn't save it, so later butler steps still need `BUTLER_API_KEY`. The post step runs `butler logout` and deletes the itch config directory.
 
 ### inputs
 
